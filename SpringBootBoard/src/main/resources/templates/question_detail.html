@@ -1,0 +1,126 @@
+<html layout:decorate="~{layout}">
+	<div layout:fragment="content" class="container my-3">
+		<h1 class="border-bottom py-2" th:text="${question.subject}"></h1>
+		<div class="card my-3">
+			<div class="card-body">
+				<div class="card-text" th:utext="${@commonUtil.markdown(question.content)}"></div>
+				<div class="d-flex justify-content-end">
+					<div th:if="${question.modifyDate != null}" class="badge bg-light text-dark p-2 text-start mx-3">
+						<div class="mb-2">Edited</div>
+						<div th:text="${#temporals.format(question.modifyDate, 'yyyy. MM. dd. HH:mm')}"></div>
+					</div>
+					<div class="badge bg-light text-dark p-2 text-start">
+						<div class="mb-2"><span th:if="${question.author != null}" th:text="${question.author.username}"></span></div>
+						<div th:text="${#temporals.format(question.createDate, 'yyyy. MM. dd. HH:mm')}"></div>
+					</div>
+				</div>
+				<div class="my-3">
+					<a th:data-uri="@{|/question/vote/${question.id}|}" href="javascript:void(0);"
+					   class="recommend btn btn-sm btn-outline-secondary">Like
+					   <span class="badge rounded-pill bg-success" th:text="${#lists.size(question.voter)}"></span></a>
+					<a th:href="@{|/question/modify/${question.id}|}" class="btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+					   th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}" 
+					   th:text="Edit"></a>
+					<a th:data-uri="@{|/question/delete/${question.id}|}" href="javascript:void(0);" class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+					   th:if="${question.author != null and #authentication.getPrincipal().getUsername() == question.author.username}" 
+					   th:text="Delete"></a>
+				</div>
+				<div class="mt-3" th:if="${not #lists.isEmpty(question.commentList)}">
+					<div th:each="comment,index : ${question.commentList}" class="comment py-2 text-muted">
+						<span style="white-space: pre-line;" th:text="${comment.content}"></span>
+						<span th:if="${comment.modifyDate != null}"
+							  th:text="| - ${comment.author.username}, ${#temporals.format(comment.createDate, 'yyyy. MM. dd. HH:mm')} (수정: ${#temporals.format(comment.modifyDate, 'yyyy. MM. dd. HH:mm')})|"></span>
+						<span th:if="${comment.modifyDate == null}"
+							  th:text="| - ${comment.author.username}, ${#temporals.format(comment.createDate, 'yyyy. MM. dd. HH:mm')}|"></span>
+						<a sec:authorize="isAuthenticated()"
+						   th:if="${#authentication.getPrincipal().getUsername() == comment.author.username}"
+						   th:href="@{|/comment/modify/${comment.id}|}" class="small">Edit</a>
+						<a sec:authorize="isAuthenticated()"
+						   th:if="${#authentication.getPrincipal().getUsername() == comment.author.username}"
+						   href="javascript:void(0);" class="small delete" th:data-uri="@{|/comment/delete/${comment.id}|}">Delete</a>
+					</div>
+				</div>
+				<div>
+					<a th:href="@{|/comment/create/question/${question.id}|}" 
+					   class="small"><small>Comment</small></a>
+				</div>
+			</div>
+		</div>
+		
+		<h5 class="border-bottom my-3 py-2" th:text="|${#lists.size(question.answerList)} Answer registered.|"></h5>
+		
+		<div class="card my-3" th:each="answer : ${question.answerList}">
+			<a th:id="|answer_${answer.id}|"></a>
+			<div class="card-body">
+				<div class="card-text" th:utext="${@commonUtil.markdown(answer.content)}"></div>
+				<div class="d-flex justify-content-end">
+					<div class="badge bg-light text-dark p-2 text-start mx-3">
+						<div class="mb-2">Edited</div>
+						<div th:text="${#temporals.format(answer.modifyDate, 'yyyy. MM. dd. HH:mm')}"></div>
+					</div>
+					<div class="badge bg-light text-dark p-2 text-start">
+						<div class="mb-2"><span th:if="${answer.author != null}" th:text="${answer.author.username}"></span></div>
+						<div th:text="${#temporals.format(answer.createDate, 'yyyy. MM. dd. HH:mm')}"></div>
+					</div>
+				</div>
+				<div class="my-3">
+					<a th:data-uri="@{|/answer/vote/${answer.id}|}"
+					   href="javascript:void(0);" class="recommend btn btn-sm btn-outline-secondary">Like
+						<span class="badge rounded-pill bg-success" th:text="${#lists.size(answer.voter)}"></span></a>
+					<a th:href="@{|/answer/modify/${answer.id}|}" class="btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()" 
+					   th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}" 
+					   th:text="Edit"></a>
+					<a href="javascript:void(0);" class="delete btn btn-sm btn-outline-secondary" 
+					   th:data-uri="@{|/answer/delete/${answer.id}|}" sec:authorize="isAuthenticated()" 
+					   th:if="${answer.author != null and #authentication.getPrincipal().getUsername() == answer.author.username}"
+					   th:text="Delete"></a>
+				</div>
+				<div class="mt-3" th:if="${not #lists.isEmpty(answer.commentList)}">
+					<div th:each="comment,index : ${answer.commentList}" class="comment py-2 text-muted">
+						<span style="white-space: pre-line;" th:text="${comment.content}"></span>
+						<span th:if="${comment.modifyDate != null}"
+							  th:text="| - ${comment.author.username}, ${#temporals.format(comment.createDate, 'yyyy. MM. dd. HH:mm')} (수정: ${#temporals.format(comment.modifyDate, 'yyyy. MM. dd. HH:mm')})|"></span>
+						<span th:if="${comment.modifyDate == null}"
+							  th:text="| - ${comment.author.username}, ${#temporals.format(comment.createDate, 'yyyy. MM. dd. HH:mm')}|"></span>
+						<a sec:authorize="isAuthenticated()"
+						   th:if="${#authentication.getPrincipal().getUsername() == comment.author.username}"
+						   th:href="@{|/comment/modify/${comment.id}|}" class="small">Edit</a>
+						<a sec:authorize="isAuthenticated()"
+						   th:if="${#authentication.getPrincipal().getUsername() == comment.author.username}"
+						   href="javascript:void(0);" class="small delete" th:data-uri="@{|/comment/delete/${comment.id}|}">Delete</a>
+					</div>
+				</div>
+				<div>
+					<a th:href="@{|/comment/create/answer/${answer.id}|}" 
+					   class="small"><small>Comment</small></a>
+				</div>
+			</div>
+		</div>
+		<form th:action="@{|/answer/create/${question.id}|}" th:object="${answerForm}" method="post" class="my-3">
+			<div th:replace="~{form_errors :: formErrorsFragment}"></div>
+			<textarea sec:authorize="isAnonymous()" th:field="*{content}" rows="10" class="form-control" disabled></textarea>
+			<textarea sec:authorize="isAuthenticated()" th:field="*{content}" rows="10" class="form-control"></textarea>
+			<input type="submit" value="Answer" class="btn btn-primary my-2">
+		</form>
+	</div>
+	<script layout:fragment="script" type="text/javascript">
+		
+		const delete_elements = document.getElementsByClassName("delete");
+		Array.from(delete_elements).forEach(function(element){
+			element.addEventListener('click', function() {
+				if(confirm("Are you sure to delete?")) {
+					location.href = this.dataset.uri;
+				}
+			});
+		});
+		
+		const recommend_elements = document.getElementsByClassName("recommend");
+		Array.from(recommend_elements).forEach(function(element) {
+			element.addEventListener('click', function() {
+				if(confirm("add a Like.")) {
+					location.href = this.dataset.uri;
+				}
+			});
+		});
+	</script>
+</html>
